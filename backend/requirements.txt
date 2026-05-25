@@ -1,0 +1,24 @@
+# Web framework
+fastapi
+uvicorn[standard]
+
+# LangChain / LangGraph
+langchain
+langchain-anthropic
+langgraph
+
+# Config
+pydantic-settings
+
+# Database
+sqlalchemy[asyncio]
+asyncpg
+alembic
+
+# Date / time parsing
+dateparser
+
+# Dev / testing
+pytest
+pytest-asyncio
+httpx

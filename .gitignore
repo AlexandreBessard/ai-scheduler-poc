@@ -12,6 +12,9 @@ dist/
 .mypy_cache/
 .ruff_cache/
 
+# JetBrains / PyCharm
+.idea/
+
 # macOS
 .DS_Store
 

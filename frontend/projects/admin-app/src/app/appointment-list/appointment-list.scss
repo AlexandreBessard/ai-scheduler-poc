@@ -1,0 +1,96 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 40px 32px;
+  box-sizing: border-box;
+}
+
+.admin-wrapper {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.admin-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 28px;
+
+  h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+
+  .count {
+    font-size: 0.9rem;
+    color: #888;
+  }
+}
+
+.table-container {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.empty {
+  padding: 48px;
+  text-align: center;
+  color: #aaa;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.93rem;
+}
+
+thead tr {
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  padding: 14px 20px;
+  text-align: left;
+  font-weight: 600;
+  color: #555;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+tbody tr {
+  border-bottom: 1px solid #f3f3f3;
+  transition: background 0.15s;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: #fafbff; }
+}
+
+td {
+  padding: 14px 20px;
+  color: #333;
+  vertical-align: top;
+}
+
+.name { font-weight: 500; color: #1a1a2e; }
+.request { color: #555; max-width: 320px; }
+.date { white-space: nowrap; }
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
+
+  &.confirmed  { background: #d1fae5; color: #065f46; }
+  &.pending    { background: #fef3c7; color: #92400e; }
+  &.cancelled  { background: #fee2e2; color: #991b1b; }
+}

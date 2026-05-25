@@ -1,0 +1,40 @@
+<div class="chat-wrapper">
+  <header class="chat-header">
+    <h1>Book an Appointment</h1>
+    <p>Describe what you need and we'll schedule it for you.</p>
+  </header>
+
+  <section class="chat-messages" aria-live="polite">
+    @if (messages().length === 0) {
+      <div class="empty-state">
+        <span class="icon">📅</span>
+        <p>Start by telling us what appointment you'd like to schedule.</p>
+      </div>
+    }
+    @for (msg of messages(); track $index) {
+      <div class="message" [class.user]="msg.role === 'user'" [class.assistant]="msg.role === 'assistant'">
+        <span class="bubble">{{ msg.text }}</span>
+      </div>
+    }
+    @if (loading()) {
+      <div class="message assistant">
+        <span class="bubble typing">
+          <span></span><span></span><span></span>
+        </span>
+      </div>
+    }
+  </section>
+
+  <footer class="chat-input">
+    <textarea
+      [(ngModel)]="prompt"
+      (keydown)="onKeydown($event)"
+      placeholder="e.g. I'd like a dentist appointment next Tuesday afternoon…"
+      rows="3"
+      [disabled]="loading()"
+    ></textarea>
+    <button (click)="send()" [disabled]="!prompt.trim() || loading()">
+      Send
+    </button>
+  </footer>
+</div>

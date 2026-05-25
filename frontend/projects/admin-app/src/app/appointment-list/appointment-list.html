@@ -1,0 +1,35 @@
+<div class="admin-wrapper">
+  <header class="admin-header">
+    <h1>Scheduled Appointments</h1>
+    <span class="count">{{ appointments().length }} total</span>
+  </header>
+
+  <div class="table-container">
+    @if (appointments().length === 0) {
+      <div class="empty">No appointments yet.</div>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Request</th>
+            <th>Scheduled</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (appt of appointments(); track appt.id) {
+            <tr>
+              <td class="name">{{ appt.customerName }}</td>
+              <td class="request">{{ appt.request }}</td>
+              <td class="date">{{ appt.scheduledAt | date:'MMM d, y – HH:mm' }}</td>
+              <td>
+                <span class="badge" [class]="appt.status">{{ appt.status }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

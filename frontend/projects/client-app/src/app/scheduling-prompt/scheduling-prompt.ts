@@ -29,7 +29,7 @@ export class SchedulingPrompt implements OnInit {
   loading = signal(false);
 
   ngOnInit(): void {
-    this.sendMessage('hello');
+    this.sendMessage('Hi !');
   }
 
   send(): void {

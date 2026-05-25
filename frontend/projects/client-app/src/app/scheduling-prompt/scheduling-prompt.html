@@ -1,7 +1,13 @@
 <div class="chat-wrapper">
   <header class="chat-header">
-    <h1>Book an Appointment</h1>
-    <p>Describe what you need and we'll schedule it for you.</p>
+    <div class="header-left">
+      <h1>Book an Appointment</h1>
+      <p>Describe what you need and we'll schedule it for you.</p>
+    </div>
+    <div class="session-badge" [title]="threadId">
+      <span class="session-dot"></span>
+      <span class="session-id">{{ threadId }}</span>
+    </div>
   </header>
 
   <section class="chat-messages" aria-live="polite">

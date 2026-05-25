@@ -13,6 +13,8 @@ interface Message {
   styleUrl: './scheduling-prompt.scss',
 })
 export class SchedulingPrompt {
+  readonly threadId = crypto.randomUUID();
+
   prompt = '';
   messages = signal<Message[]>([]);
   loading = signal(false);
@@ -25,7 +27,7 @@ export class SchedulingPrompt {
     this.prompt = '';
     this.loading.set(true);
 
-    // Placeholder: replace with real API call
+    // Placeholder: replace with real API call, pass this.threadId in the body
     setTimeout(() => {
       this.messages.update(msgs => [
         ...msgs,

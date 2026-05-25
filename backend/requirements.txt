@@ -16,7 +16,7 @@ asyncpg
 alembic
 
 # Date / time parsing
-python-dateparser
+dateparser
 
 # Dev / testing
 pytest

@@ -1,12 +1,18 @@
-# Application settings loaded from environment variables / .env file.
-#
-# Uses pydantic-settings (BaseSettings).
-#
-# Fields:
-#   - ANTHROPIC_API_KEY: str         — Claude API key
-#   - CLAUDE_MODEL: str              — model ID, e.g. "claude-sonnet-4-6"
-#   - CORS_ORIGINS: list[str]        — allowed origins for CORS
-#   - ENV: str                       — "development" | "production"
-#
-# A single `get_settings()` function cached with @lru_cache is exported
-# and injected via FastAPI Depends() wherever config is needed.
+from functools import lru_cache
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    # override via .env file
+    anthropic_api_key: str = ""
+    claude_model: str = "claude-sonnet-4-6"
+    cors_origins: list[str] = ["http://localhost:4200", "http://localhost:4201"]
+    database_url: str = "postgresql+asyncpg://scheduler:scheduler@localhost:5433/scheduler"
+    env: str = "development"
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+# (caches) functions results so it does not recompute them every time.
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

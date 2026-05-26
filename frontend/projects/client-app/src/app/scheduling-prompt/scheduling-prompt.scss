@@ -7,6 +7,7 @@
 }
 
 .chat-wrapper {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -178,5 +179,104 @@
 
     &:hover:not(:disabled) { background: #4338ca; }
     &:disabled { background: #c7c4f0; cursor: not-allowed; }
+  }
+}
+
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  z-index: 10;
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 32px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1e1e2e;
+  }
+
+  .modal-amount {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #555;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #444;
+
+    input {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+
+      &:focus { border-color: #4f46e5; }
+    }
+  }
+
+  .modal-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 4px;
+
+    .btn-secondary {
+      padding: 9px 18px;
+      background: transparent;
+      color: #666;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+
+      &:hover:not(:disabled) { border-color: #999; color: #333; }
+      &:disabled { opacity: 0.5; cursor: not-allowed; }
+    }
+
+    .btn-primary {
+      padding: 9px 18px;
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover:not(:disabled) { background: #4338ca; }
+      &:disabled { background: #c7c4f0; cursor: not-allowed; }
+    }
   }
 }

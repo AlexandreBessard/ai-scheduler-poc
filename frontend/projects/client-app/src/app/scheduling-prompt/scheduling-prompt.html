@@ -1,8 +1,8 @@
 <div class="chat-wrapper">
   <header class="chat-header">
     <div class="header-left">
-      <h1>Book an Appointment</h1>
-      <p>Describe what you need and we'll schedule it for you.</p>
+      <h1>Book a Haircut</h1>
+      <p>Tell us what service you need and we'll find the perfect slot.</p>
     </div>
     <div class="session-badge" [title]="threadId">
       <span class="session-dot"></span>
@@ -13,13 +13,17 @@
   <section class="chat-messages" aria-live="polite">
     @if (messages().length === 0) {
       <div class="empty-state">
-        <span class="icon">📅</span>
-        <p>Start by telling us what appointment you'd like to schedule.</p>
+        <span class="icon">✂️</span>
+        <p>Start by telling us what haircut service you'd like to book.</p>
       </div>
     }
     @for (msg of messages(); track $index) {
       <div class="message" [class.user]="msg.role === 'user'" [class.assistant]="msg.role === 'assistant'">
-        <span class="bubble">{{ msg.text }}</span>
+        @if (msg.role === 'assistant') {
+          <div class="bubble"><markdown [data]="msg.text" /></div>
+        } @else {
+          <span class="bubble">{{ msg.text }}</span>
+        }
       </div>
     }
     @if (loading()) {
@@ -35,7 +39,7 @@
     <textarea
       [(ngModel)]="prompt"
       (keydown)="onKeydown($event)"
-      placeholder="e.g. I'd like a dentist appointment next Tuesday afternoon…"
+      placeholder="e.g. I'd like a haircut next Saturday at 11am…"
       rows="3"
       [disabled]="loading()"
     ></textarea>
@@ -43,4 +47,40 @@
       Send
     </button>
   </footer>
+
+  @if (pendingPayment()) {
+    <div class="modal-overlay">
+      <div class="modal-card">
+        <h2>Pay in advance</h2>
+        <p class="modal-amount">Amount due: <strong>€{{ pendingPayment()!.amount.toFixed(2) }}</strong></p>
+
+        <label>
+          Name on card
+          <input [(ngModel)]="card.name" placeholder="Alex Dupont" autocomplete="cc-name" />
+        </label>
+        <label>
+          Card number
+          <input [(ngModel)]="card.number" placeholder="4242 4242 4242 4242" maxlength="19" autocomplete="cc-number" />
+        </label>
+        <div class="modal-row">
+          <label>
+            Expiry
+            <input [(ngModel)]="card.expiry" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp" />
+          </label>
+          <label>
+            CVV
+            <input [(ngModel)]="card.cvv" placeholder="123" maxlength="3" autocomplete="cc-csc" type="password" />
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="dismissPayment()" [disabled]="paymentLoading()">Pay later</button>
+          <button class="btn-primary" (click)="submitPayment()"
+                  [disabled]="!card.number || !card.expiry || !card.cvv || !card.name || paymentLoading()">
+            {{ paymentLoading() ? 'Processing…' : 'Pay €' + pendingPayment()!.amount.toFixed(2) }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

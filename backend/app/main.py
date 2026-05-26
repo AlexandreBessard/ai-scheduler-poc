@@ -1,13 +1,20 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
-# module import
-# import the module: app/api/routes/chat.py
-from app.api.routes import chat
+from app.api.routes import chat, appointments
+from app.agent.graph import build_graph
 
 settings = get_settings()
 
-app = FastAPI(title="AI Scheduler")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.graph = build_graph()
+    yield
+
+
+app = FastAPI(title="AI Scheduler", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,6 +24,8 @@ app.add_middleware(
 )
 
 app.include_router(chat.router)
+app.include_router(appointments.router)
+
 
 @app.get("/health")
 async def health() -> dict:

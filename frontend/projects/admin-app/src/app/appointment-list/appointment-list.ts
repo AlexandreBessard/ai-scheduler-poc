@@ -1,43 +1,44 @@
-import { Component, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { Component, signal, inject, OnInit } from '@angular/core';
+import { DatePipe, TitleCasePipe } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 
 export interface Appointment {
   id: string;
-  customerName: string;
+  customer_name: string;
+  service_type: string;
+  stylist_name: string;
   request: string;
-  scheduledAt: Date;
+  scheduled_at: string;
+  duration_minutes: number;
+  price: number;
   status: 'pending' | 'confirmed' | 'cancelled';
+  payment_status: 'unpaid' | 'paid';
 }
 
 @Component({
   selector: 'app-appointment-list',
-  imports: [DatePipe],
+  imports: [DatePipe, TitleCasePipe],
   templateUrl: './appointment-list.html',
   styleUrl: './appointment-list.scss',
 })
-export class AppointmentList {
-  // Placeholder data — replace with real API service
-  appointments = signal<Appointment[]>([
-    {
-      id: '1',
-      customerName: 'Alice Martin',
-      request: 'Dentist appointment next Tuesday afternoon',
-      scheduledAt: new Date('2026-05-27T14:00:00'),
-      status: 'confirmed',
-    },
-    {
-      id: '2',
-      customerName: 'Bob Dupont',
-      request: 'General check-up, any morning slot this week',
-      scheduledAt: new Date('2026-05-26T09:30:00'),
-      status: 'pending',
-    },
-    {
-      id: '3',
-      customerName: 'Claire Petit',
-      request: 'Follow-up consultation for back pain',
-      scheduledAt: new Date('2026-05-28T11:00:00'),
-      status: 'cancelled',
-    },
-  ]);
+export class AppointmentList implements OnInit {
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = 'http://localhost:8000';
+
+  appointments = signal<Appointment[]>([]);
+  loading = signal(true);
+  error = signal<string | null>(null);
+
+  ngOnInit(): void {
+    this.http.get<Appointment[]>(`${this.apiUrl}/appointments`).subscribe({
+      next: (data) => {
+        this.appointments.set(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Could not load appointments. Make sure the backend is running.');
+        this.loading.set(false);
+      },
+    });
+  }
 }

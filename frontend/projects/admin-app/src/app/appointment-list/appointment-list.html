@@ -1,35 +1,53 @@
 <div class="admin-wrapper">
   <header class="admin-header">
-    <h1>Scheduled Appointments</h1>
-    <span class="count">{{ appointments().length }} total</span>
+    <h1>Salon Appointments</h1>
+    @if (!loading()) {
+      <span class="count">{{ appointments().length }} total</span>
+    }
   </header>
 
-  <div class="table-container">
-    @if (appointments().length === 0) {
-      <div class="empty">No appointments yet.</div>
-    } @else {
+  @if (loading()) {
+    <div class="empty">Loading appointments…</div>
+  } @else if (error()) {
+    <div class="empty error">{{ error() }}</div>
+  } @else if (appointments().length === 0) {
+    <div class="empty">No appointments yet.</div>
+  } @else {
+    <div class="table-container">
       <table>
         <thead>
           <tr>
             <th>Customer</th>
-            <th>Request</th>
+            <th>Service</th>
+            <th>Stylist</th>
+            <th>Notes</th>
             <th>Scheduled</th>
+            <th>Duration</th>
+            <th>Price</th>
             <th>Status</th>
+            <th>Payment</th>
           </tr>
         </thead>
         <tbody>
           @for (appt of appointments(); track appt.id) {
             <tr>
-              <td class="name">{{ appt.customerName }}</td>
-              <td class="request">{{ appt.request }}</td>
-              <td class="date">{{ appt.scheduledAt | date:'MMM d, y – HH:mm' }}</td>
+              <td class="name">{{ appt.customer_name }}</td>
+              <td class="service">{{ appt.service_type | titlecase }}</td>
+              <td class="stylist">{{ appt.stylist_name || '—' }}</td>
+              <td class="request">{{ appt.request || '—' }}</td>
+              <td class="date">{{ appt.scheduled_at | date:'MMM d, y – HH:mm' }}</td>
+              <td class="duration">{{ appt.duration_minutes }} min</td>
+              <td class="price">€{{ appt.price.toFixed(2) }}</td>
               <td>
                 <span class="badge" [class]="appt.status">{{ appt.status }}</span>
+              </td>
+              <td>
+                <span class="badge" [class]="appt.payment_status">{{ appt.payment_status }}</span>
               </td>
             </tr>
           }
         </tbody>
       </table>
-    }
-  </div>
+    </div>
+  }
 </div>

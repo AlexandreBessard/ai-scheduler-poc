@@ -1,5 +1,9 @@
 from functools import lru_cache
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Resolve .env relative to this file so it works regardless of CWD
+_ENV_FILE = Path(__file__).parent.parent / ".env"
 
 
 class Settings(BaseSettings):
@@ -10,7 +14,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://scheduler:scheduler@localhost:5433/scheduler"
     env: str = "development"
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_file=_ENV_FILE, env_file_encoding="utf-8")
 
 # (caches) functions results so it does not recompute them every time.
 @lru_cache

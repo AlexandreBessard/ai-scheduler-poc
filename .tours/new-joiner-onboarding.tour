@@ -1,0 +1,83 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "New Joiner Onboarding",
+  "description": "End-to-end walkthrough of the AI hair salon scheduler — from repo layout to LangGraph agent loop, payment flow, and Angular frontends.",
+  "ref": "work-in-progress",
+  "steps": [
+    {
+      "directory": ".",
+      "title": "Repo at a Glance",
+      "description": "Three top-level concerns: `backend/` (Python FastAPI + LangGraph agent), `frontend/` (Angular 21 monorepo, two apps), and `docker-compose.yml` (PostgreSQL on port 5433). CLAUDE.md is the authoritative cheat-sheet — read it first."
+    },
+    {
+      "file": "docker-compose.yml",
+      "line": 1,
+      "title": "Infrastructure: PostgreSQL",
+      "description": "A single Postgres service on **port 5433** (5432 is taken by the system install). Run `docker compose up -d` before starting the backend. Credentials are `scheduler/scheduler`. The service layer currently uses an in-memory dict — the `DATABASE_URL` env var is set up ready for the real migration."
+    },
+    {
+      "file": "backend/app/main.py",
+      "line": 12,
+      "title": "FastAPI Entry Point",
+      "description": "The `lifespan` async context manager boots the app. The single most important line here is **line 13** — `build_graph()` compiles the LangGraph graph **once** and stores it on `app.state`. Every `/chat` request reuses this compiled graph; never re-compile per request."
+    },
+    {
+      "file": "backend/app/config.py",
+      "line": 9,
+      "title": "Settings via pydantic-settings",
+      "description": "`Settings` reads from a `.env` file next to `backend/`. The only required field is `ANTHROPIC_API_KEY`. `claude_model` defaults to `claude-sonnet-4-6`. The `@lru_cache` on `get_settings()` (line 20) means the `.env` is parsed exactly once per process — no surprise re-reads at runtime."
+    },
+    {
+      "file": "backend/app/agent/graph.py",
+      "line": 8,
+      "title": "LangGraph: Building the ReAct Loop",
+      "description": "`build_graph()` wires a two-node `StateGraph`: `agent` → `tools` → `agent` → … → END. The conditional edge on line 13 is the loop control: if the last AI message has `tool_calls`, route to `tools`; otherwise terminate. `MemorySaver` as the checkpointer means conversation history is kept **in RAM** — a restart wipes all sessions."
+    },
+    {
+      "file": "backend/app/agent/nodes.py",
+      "line": 15,
+      "title": "System Prompt & Tool Binding",
+      "description": "`_SYSTEM_PROMPT` (lines 15–46) defines the agent's persona, the service menu with prices, date-handling rules, and the payment upsell script. Docstrings on the tools ARE part of the prompt — Claude reads them to decide when to call each tool. The model is lazily instantiated once via `_get_model()` and cached in a module-level variable (line 48)."
+    },
+    {
+      "file": "backend/app/agent/nodes.py",
+      "line": 74,
+      "title": "Loop Termination Logic",
+      "description": "`should_continue` is the conditional-edge function. It returns `'tools'` when the last message is an `AIMessage` with pending `tool_calls`, and `END` otherwise. **Gotcha:** if the recursion limit (set to 10 in the chat route) is hit, LangGraph raises — there is no graceful fallback today."
+    },
+    {
+      "file": "backend/app/tools/book_appointment.py",
+      "line": 7,
+      "title": "Tools Are Thin Adapters",
+      "description": "Every tool follows the same pattern: parse natural-language input, validate, delegate to `appointment_service`. Line 29 shows the date parser call — Claude passes strings like `'next Saturday at 11am'` and the tool converts them. **No data logic lives here** — that rule keeps tools easy to test and easy to swap."
+    },
+    {
+      "file": "backend/app/services/appointment_service.py",
+      "line": 10,
+      "title": "Service Layer: the Only Storage Owner",
+      "description": "`AppointmentService` is the **only** place that reads or writes `_store`. The module-level singleton `appointment_service` (line 101) is shared across all routes and tools. Swapping to a real database means rewriting this class only — nothing else. **Gotcha:** the in-memory dict is lost on every restart, so test with a fresh session each time."
+    },
+    {
+      "file": "backend/app/api/routes/chat.py",
+      "line": 29,
+      "title": "POST /chat: Agent Entry & Payment Extraction",
+      "description": "Two things happen here beyond invoking the graph. First, a sliding-window rate limiter (20 msgs / 60 s per `thread_id`, lines 18–26) guards against abuse. Second, after the graph returns, lines 40–50 scan the full message list for a `ToolMessage` from `request_payment` — if found, the structured `PaymentRequest` is added to the response JSON. **Gotcha:** `last.content` on line 37 is used as the reply text but is not guarded against non-string content (e.g. multi-part AI messages)."
+    },
+    {
+      "file": "frontend/projects/client-app/src/app/scheduling-prompt/scheduling-prompt.ts",
+      "line": 1,
+      "title": "Client App: Chat & Payment Modal",
+      "description": "`SchedulingPrompt` generates a `threadId` via `crypto.randomUUID()` on line 32 — this is the LangGraph checkpoint key that isolates each browser session. `sendMessage()` posts to `POST /chat` and handles the response. If `res.payment_request` is set, `pendingPayment` signal is populated and the payment modal renders. **Gotcha:** card fields in the modal are collected in the UI but are **not sent to the backend** — the pay POST sends an empty body, which is intentional for this mock."
+    },
+    {
+      "file": "frontend/projects/admin-app/src/app/appointment-list/appointment-list.ts",
+      "line": 1,
+      "title": "Admin App: Live Appointment Table",
+      "description": "`AppointmentList` calls `GET /appointments` in `ngOnInit()` — a direct service call that bypasses the agent entirely. The `loading` / `error` signals gate the table render. The `Appointment` interface here mirrors the Pydantic model in `backend/app/models/appointment.py` — if you add a field to the backend, add it here too."
+    },
+    {
+      "title": "What You Can Do Now",
+      "description": "You can now trace any user request end to end:\n\n1. `docker compose up -d` — start Postgres\n2. `uvicorn app.main:app --reload` — start backend\n3. `ng serve client-app` / `ng serve admin-app --port 4201` — start both frontends\n\nNext areas to explore:\n- `backend/app/tools/` — the remaining tools (cancel, list, check_availability, request_payment)\n- `backend/app/models/appointment.py` — Pydantic model and enum definitions\n- `backend/app/utils/date_parser.py` — natural language date parsing\n- Adding real DB persistence: replace `_store` in `AppointmentService` and wire `DATABASE_URL`"
+    }
+  ]
+}
